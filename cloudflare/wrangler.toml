@@ -1,0 +1,27 @@
+name = "relentless-bot"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+# 1. Background Cron Trigger (runs every 1 minute to process due reminders)
+[triggers]
+crons = ["* * * * *"]
+
+# 2. Cloudflare D1 Serverless Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "relentless-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# 3. Environment Variables
+[vars]
+TIMEZONE = "Asia/Kolkata"
+QUIET_HOURS_START = "00:00"
+QUIET_HOURS_END = "07:00"
+MORNING_PROMPT_TIME = "07:05"
+HIGH_PRIORITY_INTERVAL_MINUTES = 45
+MEDIUM_PRIORITY_INTERVAL_MINUTES = 90
+LOW_PRIORITY_INTERVAL_MINUTES = 150
+ALLOWED_USER_IDS = "" # Optional: comma-separated Telegram User IDs to whitelist
+
+# Secrets (Set via: npx wrangler secret put BOT_TOKEN)
+# - BOT_TOKEN

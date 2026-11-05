@@ -6,12 +6,12 @@
 *Zero friction. No snoozing. Relentless execution.*
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![aiogram](https://img.shields.io/badge/aiogram-v3-2CA5E0?logo=telegram&logoColor=white)](https://docs.aiogram.dev/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-Free_Tier-F38020?logo=cloudflare&logoColor=white)](cloudflare/README.md)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-WAL%20Mode-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[Features](#-key-features) • [Quick Start](#-quick-start) • [Docker Deployment](#-docker-deployment) • [Configuration](#-configuration) • [Daily Lifecycle](#-daily-lifecycle) • [Contributing](#-contributing)
+[Features](#-key-features) • [Option A: Cloudflare Free Hosting](#-option-a-cloudflare-workers-100-free-forever) • [Option B: Docker Deployment](#-option-b-docker-deployment) • [Option C: Local Python](#-option-c-local-python-setup) • [Configuration](#-configuration) • [Contributing](#-contributing)
 
 </div>
 
@@ -37,7 +37,7 @@ Unlike traditional reminder apps that let you hit "Snooze" until tomorrow, **Rel
 - 🌙 **Quiet Hours (12:00 AM – 7:00 AM)**: Completely silent during sleep hours. Pending reminders resume right at the start of your day.
 - ☀️ **Morning Kickoff (7:05 AM)**: Wakes up, prompts you for today's to-do items, and offers to keep or clear yesterday's unfinished items.
 - 🔒 **Private & Secure**: Built-in `ALLOWED_USER_IDS` whitelist prevents strangers from messaging or consuming your bot.
-- 🛡️ **Crash-Proof & Lightweight**: Powered by SQLite in **WAL mode (Write-Ahead Logging)**; runs seamlessly on a tiny VPS or Raspberry Pi (<50MB RAM).
+- 🛡️ **Multiple Deployments**: Host it **100% free on Cloudflare Workers (D1 SQLite)**, with **Docker**, or on your **local machine**.
 
 ---
 
@@ -59,38 +59,44 @@ flowchart TD
 
 ---
 
-## 🚀 Quick Start
+## ☁️ Option A: Cloudflare Workers (100% Free Forever)
 
-### 1. Get Telegram Bot Credentials
-1. Open Telegram and search for [@BotFather](https://t.me/BotFather).
-2. Send `/newbot`, name your bot, and copy your **Bot Token**.
-3. (Recommended) Get your numerical Telegram User ID from [@userinfobot](https://t.me/userinfobot) to restrict access to yourself.
+> **Recommended if you don't have a VPS or don't want to keep your computer turned on.** Runs 24/7 on Cloudflare's global edge network using Cloudflare D1 (Serverless SQLite).
 
-### 2. Clone Repository
 ```bash
-git clone https://github.com/rehan1020/RelentlessBot.git
-cd RelentlessBot
+cd cloudflare
+
+# 1. Install dependencies & log into Cloudflare
+npm install
+npx wrangler login
+
+# 2. Create your free serverless database
+npx wrangler d1 create relentless-db
+# Copy the printed database_id into cloudflare/wrangler.toml
+
+# 3. Initialize tables & store your bot token
+npx wrangler d1 execute relentless-db --file=./schema.sql
+npx wrangler secret put BOT_TOKEN
+
+# 4. Deploy!
+npx wrangler deploy
 ```
 
-### 3. Configure Environment
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-Open `.env` and fill in:
-```env
-BOT_TOKEN=123456789:ABCDefghIJKlmnoPQRstuv-WXYZ
-ALLOWED_USER_IDS=your_telegram_user_id
-TIMEZONE=Asia/Kolkata
-```
+Then open `https://relentless-bot.<your-subdomain>.workers.dev/set-webhook` in your browser to link Telegram to your worker in 1-click!
+
+*For detailed step-by-step instructions, see the [Cloudflare Setup Guide](cloudflare/README.md).*
 
 ---
 
-## 🐳 Docker Deployment (Recommended)
+## 🐳 Option B: Docker Deployment
 
 Run 24/7 on your home server, VPS, or Raspberry Pi with a single command:
 
 ```bash
+# 1. Copy environment template and set your token
+cp .env.example .env
+
+# 2. Run container
 docker compose up -d
 ```
 
@@ -99,14 +105,9 @@ To view logs:
 docker compose logs -f
 ```
 
-To stop:
-```bash
-docker compose down
-```
-
 ---
 
-## 💻 Local Setup (Python 3.11+)
+## 💻 Option C: Local Python Setup
 
 ```bash
 # 1. Create and activate virtual environment
@@ -120,7 +121,10 @@ source .venv/bin/activate
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Run the bot
+# 3. Configure environment
+cp .env.example .env
+
+# 4. Run the bot
 python main.py
 ```
 
@@ -128,7 +132,7 @@ python main.py
 
 ## ⚙️ Configuration Reference
 
-All settings can be customized in `.env`:
+All settings can be customized in `.env` (for Docker/Python) or `wrangler.toml` (for Cloudflare):
 
 | Variable | Default | Description |
 | :--- | :--- | :--- |
@@ -141,7 +145,7 @@ All settings can be customized in `.env`:
 | `HIGH_PRIORITY_INTERVAL_MINUTES` | `45` | Interval for High priority tasks. |
 | `MEDIUM_PRIORITY_INTERVAL_MINUTES` | `90` | Interval for Medium priority tasks (1.5h). |
 | `LOW_PRIORITY_INTERVAL_MINUTES` | `150` | Interval for Low priority tasks (2.5h). |
-| `DB_PATH` | `data/relentless.db`| SQLite database file location. |
+| `DB_PATH` | `data/relentless.db`| SQLite database file location (Docker/Python). |
 
 ---
 
@@ -179,7 +183,7 @@ RelentlessBot will immediately prompt you with inline buttons to assign prioriti
 
 ---
 
-## 🧪 Running Tests
+## 🧪 Running Tests (Python)
 
 The test suite validates parser edge cases, database persistence, and quiet-hours schedule calculations:
 
