@@ -1,0 +1,9 @@
+services:
+  relentless-bot:
+    build: .
+    container_name: relentless-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
