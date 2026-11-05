@@ -30,10 +30,16 @@ export function buildPriorityKeyboard(taskId: number, env: Env): InlineKeyboard 
     .text(`🟢 Low (${lowMin}m)`, `prio:${taskId}:low`);
 }
 
-export function createBot(token: string): Bot<BotContext> {
-  const bot = new Bot<BotContext>(token);
+export function createBot(env: Env): Bot<BotContext> {
+  const bot = new Bot<BotContext>(env.BOT_TOKEN);
 
-  // Whitelist Middleware
+  // 1. Attach environment to context FIRST
+  bot.use(async (ctx, next) => {
+    ctx.env = env;
+    await next();
+  });
+
+  // 2. Whitelist Middleware
   bot.use(async (ctx, next) => {
     const allowed = getAllowedUserIds(ctx.env);
     if (allowed.size === 0) return next();
@@ -330,4 +336,13 @@ export function createBot(token: string): Bot<BotContext> {
   });
 
   return bot;
+}
+
+export async function registerBotCommands(bot: Bot<BotContext>): Promise<void> {
+  await bot.api.setMyCommands([
+    { command: "start", description: "Start the bot & get welcome info" },
+    { command: "tasks", description: "View active tasks & progress" },
+    { command: "clear", description: "Clear or reset tasks" },
+    { command: "help", description: "Show usage instructions" },
+  ]);
 }
