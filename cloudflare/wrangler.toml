@@ -10,7 +10,7 @@ crons = ["* * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "relentless-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "8e07e03f-0afe-430d-a92a-6534e41f2117"
 
 # 3. Environment Variables
 [vars]
